@@ -1,10 +1,11 @@
 import PetriKit
 
-public func createTaskManager() -> PTNet {
+public func createCorrectTaskManager() -> PTNet {
     // Places
     let taskPool    = PTPlace(named: "taskPool")
     let processPool = PTPlace(named: "processPool")
     let inProgress  = PTPlace(named: "inProgress")
+    let control_token = PTPlace(named: "control_token") //control_token est une place qui serv à controller combien de jeton on a dans inProgress
 
     // Transitions
     let create      = PTTransition(
@@ -18,24 +19,24 @@ public func createTaskManager() -> PTNet {
     let success     = PTTransition(
         named          : "success",
         preconditions  : [PTArc(place: taskPool), PTArc(place: inProgress)],
-        postconditions : [])
+        postconditions : [PTArc(place: control_token)]) //quand on a franchis succes alors on puet executer un nouveau processus
     let exec       = PTTransition(
         named          : "exec",
-        preconditions  : [PTArc(place: taskPool), PTArc(place: processPool)],
+        preconditions  : [PTArc(place: taskPool), PTArc(place: processPool), PTArc(place: control_token)], //quand on a 1 jeton dans inProgress on peut pas franchir exec
         postconditions : [PTArc(place: taskPool), PTArc(place: inProgress)])
     let fail        = PTTransition(
         named          : "fail",
         preconditions  : [PTArc(place: inProgress)],
-        postconditions : [])
+        postconditions : [PTArc(place: control_token)]) //quand on a granchis fail alors on peut executer un nouveau processus
 
     // P/T-net
     return PTNet(
-        places: [taskPool, processPool, inProgress],
+        places: [taskPool, processPool, inProgress, control_token],
         transitions: [create, spawn, success, exec, fail])
 }
 
 
-public func createCorrectTaskManager() -> PTNet {
+public func createTaskManager() -> PTNet {
     // Places
     let taskPool    = PTPlace(named: "taskPool")
     let processPool = PTPlace(named: "processPool")
